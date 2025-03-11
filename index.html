@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUB19 - Coffee Log</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f8f8f8;
+        margin: 0;
+      }
+
+      h1 {
+        color: #333;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #coffeeData {
+        max-width: 100%;
+        width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        }
+
+        select {
+        padding: 10px;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 400px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        }
+
+        body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f8f8f8;
+        margin: 0;
+        }
+
+        h1 {
+        color: #333;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 20px;
+        }
+
+        h3 {
+        color: #333;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        }
+
+        ul {
+        list-style-type: none;
+        padding: 0;
+        font-size: 1.2rem;
+        margin: 0;
+        }
+
+        li {
+        padding: 10px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #ddd;
+        }
+
+        li:last-child {
+        border-bottom: none;
+        }
+
+        label {
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: #333;
+        text-align: center;
+        }
+    </style>
+</head>
+<body>
+  <h1>DUB19 - Coffee Log</h1>
+  <label for="dateSelect">Select a date:</label>
+  <select id="dateSelect">
+    <option value="">-- Select a date --</option>
+  </select>
+  
+  <div id="coffeeData"></div>
+
+  <script>
+    // Fetch the data from the JSON file
+// Fetch the data from the JSON file
+// Fetch the data from the JSON file
+fetch('https://sneaker-square.s3.eu-west-1.amazonaws.com/coffee_log_all_dates.json')
+  .then(response => response.json())
+  .then(data => {
+    // Get the list of available dates and sort them in descending order
+    const dates = Object.keys(data).sort((a, b) => new Date(b) - new Date(a));
+
+    // Get the dropdown menu
+    const dateDropdown = document.getElementById('dateSelect');
+
+    // Add sorted options to the dropdown menu
+    dates.forEach(date => {
+      const option = document.createElement('option');
+      option.value = date;
+      option.textContent = date;
+      dateDropdown.appendChild(option);
+    });
+
+    // Add event listener for date change
+    dateDropdown.addEventListener('change', function() {
+      const selectedDate = dateDropdown.value;
+      displayCoffeeData(selectedDate, data[selectedDate]);
+    });
+
+    // Function to display coffee data for the selected date
+    function displayCoffeeData(selectedDate, dataForDate) {
+      const coffeeDataContainer = document.getElementById('coffeeData');
+      coffeeDataContainer.innerHTML = '';
+
+      // Display the selected date at the top
+      const dateTitle = document.createElement('h2');
+      dateTitle.textContent = `Data for: ${selectedDate}`;
+      coffeeDataContainer.appendChild(dateTitle);
+
+      // Display coffee count, milk count, syrup count, and extra count
+      const coffeeCount = dataForDate.coffeeCount;
+      const milkCount = dataForDate.milkCount;
+      const syrupCount = dataForDate.syrupCount;
+      const extraCount = dataForDate.extraCount;
+
+      const sections = [
+        { title: 'Coffee Types', data: coffeeCount },
+        { title: 'Milk Types', data: milkCount },
+        { title: 'Syrup Types', data: syrupCount },
+        { title: 'Extras', data: extraCount }
+      ];
+
+      sections.forEach(section => {
+        if (Object.keys(section.data).length > 0) {
+          const sectionTitle = document.createElement('h3');
+          sectionTitle.textContent = section.title;
+          coffeeDataContainer.appendChild(sectionTitle);
+
+          const ul = document.createElement('ul');
+          for (const item in section.data) {
+            const li = document.createElement('li');
+            li.textContent = `${item}: ${section.data[item]}`;
+            ul.appendChild(li);
+          }
+          coffeeDataContainer.appendChild(ul);
+        }
+      });
+    }
+
+    // Initialize with the first date in the list (most recent)
+    displayCoffeeData(dates[0], data[dates[0]]);
+  })
+  .catch(error => console.error('Error fetching data:', error));
+
+  </script>
+</body>
+</html>
