@@ -58,10 +58,18 @@
 <body>
     <h1>Coffee Data</h1>
     <div class="container">
+        <label for="location-dropdown">Select Location:</label>
+        <select id="location-dropdown">
+            <option value="dub19upstairs">Dub19 Upstairs</option>
+            <option value="dub19downstairs">Dub19 Downstairs</option>
+            <option value="dub21">Dub21</option>
+        </select>
+
         <label for="date-dropdown">Select a Date:</label>
         <select id="date-dropdown">
             <!-- Date options will be populated dynamically -->
         </select>
+
         <div class="data-section" id="data">
             <!-- Coffee data will be displayed here -->
         </div>
@@ -88,42 +96,57 @@
         const db = getFirestore(app);
 
         // Fetch coffee data from Firestore
+       // Fetch coffee data from Firestore
         async function getData() {
-            const coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");  // Fetch the specific 'coffee_logs' document
-            const docSnap = await getDoc(coffeeLogsRef);
-            
-            if (docSnap.exists()) {
-                const allData = docSnap.data().logs;
-                const dateDropdown = document.getElementById("date-dropdown");
-                
-                // Populate the dropdown with dates
-                Object.keys(allData).forEach((date) => {
-                    const option = document.createElement("option");
-                    option.value = date;
-                    option.textContent = date;
-                    dateDropdown.appendChild(option);
-                });
-
-                // Display the data for the selected date
-                dateDropdown.addEventListener("change", (event) => {
-                    const selectedDate = event.target.value;
-                    displayData(allData[selectedDate], selectedDate);
-                });
-
-                // Display data for the first date by default
-                if (Object.keys(allData).length > 0) {
-                    const firstDate = Object.keys(allData)[0];
-                    displayData(allData[firstDate], firstDate);
+            const locationDropdown = document.getElementById("location-dropdown");
+            const dateDropdown = document.getElementById("date-dropdown");
+            let coffeeLogsRef;
+        
+            // Listen for location selection change
+            locationDropdown.addEventListener("change", async (event) => {
+                const selectedLocation = event.target.value;
+        
+                // Determine which collection to fetch based on the location selected
+                if (selectedLocation === "dub19upstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+                } else if (selectedLocation === "dub19downstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+                } else if (selectedLocation === "dub21") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
                 }
-            } else {
-                document.getElementById("data").innerHTML = "No data available!";
-            }
+        
+                const docSnap = await getDoc(coffeeLogsRef);
+        
+                if (docSnap.exists()) {
+                    const allData = docSnap.data().logs;
+        
+                    // Populate the dropdown with dates
+                    dateDropdown.innerHTML = ''; // Clear existing options
+                    Object.keys(allData).forEach((date) => {
+                        const option = document.createElement("option");
+                        option.value = date;
+                        option.textContent = date;
+                        dateDropdown.appendChild(option);
+                    });
+        
+                    // Display data for the first date by default
+                    if (Object.keys(allData).length > 0) {
+                        const firstDate = Object.keys(allData)[0];
+                        displayData(allData[firstDate], firstDate);
+                    }
+                } else {
+                    document.getElementById("data").innerHTML = "No data available!";
+                }
+            });
+        
+            // Trigger the location selection change to populate the date dropdown initially
+            locationDropdown.dispatchEvent(new Event('change'));
         }
-
+        
         // Function to display coffee data for a specific date
         function displayData(data, date) {
             let dataHtml = `<h3>Coffee Data for ${date}</h3>`;
-
+        
             dataHtml += `
                 <p><strong>Coffee Count:</strong><br> ${formatData(data.coffeeCount)}</p>
                 <p><strong>Milk Count:</strong><br> ${formatData(data.milkCount)}</p>
@@ -132,19 +155,19 @@
             `;
             document.getElementById("data").innerHTML = dataHtml;
         }
-
+        
         // Function to format the data in a readable way
         function formatData(countData) {
             if (Object.keys(countData).length === 0) {
                 return "No additional items.";
             }
-
+        
             return Object.keys(countData)
                 .map(key => `${key}: ${countData[key]}`)
                 .join('<br>');
         }
-
-        // Call the function to fetch and display data
+        
+        // Call the function to fetch and display data initially
         getData();
     </script>
 </body>
