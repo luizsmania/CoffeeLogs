@@ -137,6 +137,7 @@
         // Fetch coffee data from Firestore
        // Fetch coffee data from Firestore
         // Fetch coffee data from Firestore
+ // Fetch coffee data from Firestore
         async function getData() {
             const locationDropdown = document.getElementById("location-dropdown");
             const dateDropdown = document.getElementById("date-dropdown");
@@ -146,27 +147,30 @@
             locationDropdown.addEventListener("change", async (event) => {
                 const selectedLocation = event.target.value;
 
-            // Determine which collection to fetch based on the location selected
-            if (selectedLocation === "dub19upstairs") {
-                coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
-            } else if (selectedLocation === "dub19downstairs") {
-                coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
-            } else if (selectedLocation === "dub21") {
-                coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
-            } else if (selectedLocation === "dub14upstairs") {
-                coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
-            } else if (selectedLocation === "dub14downstairs") {
-                coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
-            }
+                // Determine which collection to fetch based on the location selected
+                if (selectedLocation === "dub19upstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+                } else if (selectedLocation === "dub19downstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+                } else if (selectedLocation === "dub21") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+                } else if (selectedLocation === "dub14upstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
+                } else if (selectedLocation === "dub14downstairs") {
+                    coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+                }
 
                 const docSnap = await getDoc(coffeeLogsRef);
 
                 if (docSnap.exists()) {
                     const allData = docSnap.data().logs;
 
-                    // Populate the date dropdown with available dates
+                    // Sort the dates in descending order (most recent first)
+                    const sortedDates = Object.keys(allData).sort((a, b) => new Date(b) - new Date(a));
+
+                    // Populate the date dropdown with sorted dates
                     dateDropdown.innerHTML = ''; // Clear existing options
-                    Object.keys(allData).forEach((date) => {
+                    sortedDates.forEach((date) => {
                         const option = document.createElement("option");
                         option.value = date;
                         option.textContent = date;
@@ -174,8 +178,8 @@
                     });
 
                     // Display data for the first date by default
-                    if (Object.keys(allData).length > 0) {
-                        const firstDate = Object.keys(allData)[0];
+                    if (sortedDates.length > 0) {
+                        const firstDate = sortedDates[0];
                         displayData(allData[firstDate], firstDate);
                     }
                 } else {
@@ -196,6 +200,7 @@
             locationDropdown.dispatchEvent(new Event('change'));
         }
 
+
         // Function to fetch data for the selected date and location
         async function fetchDataForDate(location, date) {
             let coffeeLogsRef;
@@ -206,7 +211,12 @@
                 coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
             } else if (location === "dub21") {
                 coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+            } else if (location === "dub14upstairs") {
+                coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
+            } else if (location === "dub14downstairs") {
+                coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
             }
+
 
             const docSnap = await getDoc(coffeeLogsRef);
             
