@@ -6,54 +6,91 @@
     <title>Coffee Data</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f0f0;
             color: #333;
+            line-height: 1.6;
         }
-
+    
         h1 {
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             background-color: #4CAF50;
             color: white;
+            font-size: 32px;
+            letter-spacing: 2px;
         }
-
+    
         .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
             background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
-
+    
+        label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+    
         select {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            background-color: #f1f1f1;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 18px;
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
+            transition: border-color 0.3s;
         }
-
+    
+        select:hover {
+            border-color: #4CAF50;
+        }
+    
         .data-section {
-            margin-top: 20px;
+            margin-top: 30px;
+            font-size: 18px;
         }
-
+    
         .date-data {
-            background-color: #e7f7e7;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            background-color: #f7f7f7;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border-left: 5px solid #4CAF50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
+    
         .date-data h3 {
             margin-top: 0;
+            font-size: 24px;
+            color: #4CAF50;
+        }
+    
+        .date-data p {
+            margin: 10px 0;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+    
+        .date-data p strong {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    
+        .date-data p:not(:last-child) {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
     </style>
+    
 </head>
 <body>
     <h1>Coffee Data</h1>
@@ -97,15 +134,16 @@
 
         // Fetch coffee data from Firestore
        // Fetch coffee data from Firestore
+        // Fetch coffee data from Firestore
         async function getData() {
             const locationDropdown = document.getElementById("location-dropdown");
             const dateDropdown = document.getElementById("date-dropdown");
             let coffeeLogsRef;
-        
+
             // Listen for location selection change
             locationDropdown.addEventListener("change", async (event) => {
                 const selectedLocation = event.target.value;
-        
+
                 // Determine which collection to fetch based on the location selected
                 if (selectedLocation === "dub19upstairs") {
                     coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
@@ -114,13 +152,13 @@
                 } else if (selectedLocation === "dub21") {
                     coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
                 }
-        
+
                 const docSnap = await getDoc(coffeeLogsRef);
-        
+
                 if (docSnap.exists()) {
                     const allData = docSnap.data().logs;
-        
-                    // Populate the dropdown with dates
+
+                    // Populate the date dropdown with available dates
                     dateDropdown.innerHTML = ''; // Clear existing options
                     Object.keys(allData).forEach((date) => {
                         const option = document.createElement("option");
@@ -128,7 +166,7 @@
                         option.textContent = date;
                         dateDropdown.appendChild(option);
                     });
-        
+
                     // Display data for the first date by default
                     if (Object.keys(allData).length > 0) {
                         const firstDate = Object.keys(allData)[0];
@@ -138,15 +176,49 @@
                     document.getElementById("data").innerHTML = "No data available!";
                 }
             });
-        
+
+            // Listen for date selection change
+            dateDropdown.addEventListener("change", (event) => {
+                const selectedDate = event.target.value;
+                const selectedLocation = locationDropdown.value;
+
+                // Fetch data based on the selected date and location
+                fetchDataForDate(selectedLocation, selectedDate);
+            });
+
             // Trigger the location selection change to populate the date dropdown initially
             locationDropdown.dispatchEvent(new Event('change'));
         }
-        
+
+        // Function to fetch data for the selected date and location
+        async function fetchDataForDate(location, date) {
+            let coffeeLogsRef;
+
+            if (location === "dub19upstairs") {
+                coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+            } else if (location === "dub19downstairs") {
+                coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+            } else if (location === "dub21") {
+                coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+            }
+
+            const docSnap = await getDoc(coffeeLogsRef);
+            
+            if (docSnap.exists()) {
+                const allData = docSnap.data().logs;
+                
+                if (allData[date]) {
+                    displayData(allData[date], date);
+                } else {
+                    document.getElementById("data").innerHTML = "No data available for this date.";
+                }
+            }
+        }
+
         // Function to display coffee data for a specific date
         function displayData(data, date) {
             let dataHtml = `<h3>Coffee Data for ${date}</h3>`;
-        
+
             dataHtml += `
                 <p><strong>Coffee Count:</strong><br> ${formatData(data.coffeeCount)}</p>
                 <p><strong>Milk Count:</strong><br> ${formatData(data.milkCount)}</p>
@@ -155,20 +227,21 @@
             `;
             document.getElementById("data").innerHTML = dataHtml;
         }
-        
+
         // Function to format the data in a readable way
         function formatData(countData) {
             if (Object.keys(countData).length === 0) {
                 return "No additional items.";
             }
-        
+
             return Object.keys(countData)
                 .map(key => `${key}: ${countData[key]}`)
                 .join('<br>');
         }
-        
+
         // Call the function to fetch and display data initially
         getData();
+
     </script>
 </body>
 </html>
