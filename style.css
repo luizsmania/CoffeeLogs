@@ -1,76 +1,87 @@
+/* Global Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
+    background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
 }
 
 h1 {
     text-align: center;
-    padding: 30px;
+    padding: 20px 0;
     background-color: #4CAF50;
     color: white;
-    font-size: 32px;
+    font-size: 36px;
     letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
 }
 
+/* Container for the content */
 .container {
-    max-width: 900px;
+    max-width: 960px;
     margin: 40px auto;
     padding: 30px;
     background-color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    font-size: 18px;
 }
 
+/* Labels for the dropdowns */
 label {
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: block;
+    color: #555;
 }
 
+/* Style for select dropdowns */
 select {
     width: 100%;
     padding: 12px;
-    margin: 15px 0;
+    margin: 10px 0 20px;
     font-size: 18px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #fafafa;
+    border: 1px solid #ccc;
     border-radius: 6px;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s ease;
 }
 
 select:hover {
     border-color: #4CAF50;
 }
 
+/* Data Section (displaying data for a specific date) */
 .data-section {
     margin-top: 30px;
-    font-size: 18px;
 }
 
 .date-data {
-    background-color: #f7f7f7;
+    background-color: #f9f9f9;
     padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 6px;
+    margin-bottom: 30px;
+    border-radius: 8px;
     border-left: 5px solid #4CAF50;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 3%;
 }
 
-.date-data h3 {
+h3 {
     margin-top: 0;
-    font-size: 24px;
+    font-size: 26px;
     color: #4CAF50;
+    text-align: center;
 }
 
 .date-data p {
     margin: 10px 0;
     font-size: 18px;
-    line-height: 1.5;
+    line-height: 1.6;
+    color: #555;
 }
 
 .date-data p strong {
@@ -78,21 +89,36 @@ select:hover {
     color: #4CAF50;
 }
 
+/* Styling for the total amounts */
+.total-amount {
+    margin-bottom: 4px;
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    padding: 5px;
+    background-color: #e9f5e9;
+    border-radius: 5px;
+}
+
+/* Border between total amount paragraphs */
 .date-data p:not(:last-child) {
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
 }
+
+/* Export Button */
 #export-button {
-    padding: 12px 20px;
+    padding: 14px 24px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 6px;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
     width: 100%;
     text-align: center;
+    margin-top: 20px;
 }
 
 #export-button:hover {
@@ -104,3 +130,28 @@ select:hover {
     background-color: #388e3c;
     transform: translateY(0);
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .date-data h3 {
+        font-size: 22px;
+    }
+
+    .data-section {
+        font-size: 16px;
+    }
+
+    #export-button {
+        font-size: 18px;
+        padding: 12px 18px;
+    }
+}
+
