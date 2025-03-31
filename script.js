@@ -241,6 +241,46 @@ function displayRefreshSchedule() {
     }
 }
 
+function exportDataToCSV() {
+    const location = document.getElementById("location-dropdown").value;
+    const date = document.getElementById("date-dropdown").value;
+    const data = allData[date]; // Use the data from the selected date
+
+    if (!data) {
+        alert("No data available for export.");
+        return;
+    }
+
+    // Prepare the CSV header and data rows
+    const header = [`Location,${location}`, `Date,${date}`];
+    const rows = [
+        ["Coffee Count", formatDataForCSV(data.coffeeCount)],
+        ["Milk Count", formatDataForCSV(data.milkCount)],
+        ["Syrup Count", formatDataForCSV(data.syrupCount)],
+        ["Extra Count", formatDataForCSV(data.extraCount)]
+    ];
+
+    // Start building the CSV content
+    let csvContent = "data:text/csv;charset=utf-8," 
+                    + header.join("\n") + "\n\n"; // Adding a line break after header
+
+    // Format the rows for Coffee Count, Milk Count, etc., with a break after each category
+    rows.forEach(row => {
+        csvContent += row[0] + "\n" + row[1] + "\n\n";  // Add line breaks after each section
+    });
+
+    // Create a download link and trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${location}_${date}_coffee_logs.csv`);
+    document.body.appendChild(link); // Required for Firefox
+    link.click();
+    document.body.removeChild(link); // Remove the link after download
+}
+// Add event listener for the export button
+document.getElementById("export-button").addEventListener("click", exportDataToCSV);
+
 // Ensure the last updated time is set right away
 window.onload = function () {
     fetchAndUpdateData(); // Fetch data and update last updated
