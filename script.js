@@ -241,6 +241,13 @@ function displayRefreshSchedule() {
     }
 }
 
+// Ensure the last updated time is set right away
+window.onload = function () {
+    fetchAndUpdateData(); // Fetch data and update last updated
+    checkAndRefreshPage(); // Check if the page needs refreshing based on the scheduled time
+    displayRefreshSchedule(); // Display the refresh schedule message
+};
+
 function exportDataToCSV() {
     const location = document.getElementById("location-dropdown").value;
     const date = document.getElementById("date-dropdown").value;
@@ -280,10 +287,3 @@ function exportDataToCSV() {
 }
 // Add event listener for the export button
 document.getElementById("export-button").addEventListener("click", exportDataToCSV);
-
-// Ensure the last updated time is set right away
-window.onload = function () {
-    fetchAndUpdateData(); // Fetch data and update last updated
-    checkAndRefreshPage(); // Check if the page needs refreshing based on the scheduled time
-    displayRefreshSchedule(); // Display the refresh schedule message
-};
