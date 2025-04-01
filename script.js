@@ -26,38 +26,44 @@ function parseDate(dateStr) {
 }
 let allData = {};  // Declare globally so it's accessible in the export function
 
+// Function to get and populate data for the selected location and date
 async function getData() {
     const locationDropdown = document.getElementById("location-dropdown");
     const dateDropdown = document.getElementById("date-dropdown");
-    let coffeeLogsRef;
+    
+    // Fetch data whenever the location or date changes
+    async function updateDataBasedOnSelection() {
+        const selectedLocation = locationDropdown.value;
 
-    // Listen for location selection change
-    locationDropdown.addEventListener("change", async (event) => {
-        const selectedLocation = event.target.value;
-
-        // Determine which collection to fetch based on the location selected
-        if (selectedLocation === "dub19upstairs") {
-            coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
-        } else if (selectedLocation === "dub19downstairs") {
-            coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
-        } else if (selectedLocation === "dub21") {
-            coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
-        } else if (selectedLocation === "dub14upstairs") {
-            coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
-        } else if (selectedLocation === "dub14downstairs") {
-            coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+        // Set the correct Firestore reference based on the selected location
+        let coffeeLogsRef;
+        switch (selectedLocation) {
+            case "dub19upstairs":
+                coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+                break;
+            case "dub19downstairs":
+                coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+                break;
+            case "dub21":
+                coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+                break;
+            case "dub14upstairs":
+                coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
+                break;
+            case "dub14downstairs":
+                coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+                break;
         }
 
         const docSnap = await getDoc(coffeeLogsRef);
-
         if (docSnap.exists()) {
             allData = docSnap.data().logs;  // Store data in the global variable
 
             // Sort the dates in descending order (most recent first)
             const sortedDates = Object.keys(allData)
-                    .map(date => ({ date, timestamp: parseDate(date).getTime() })) // Convert to timestamps
-                    .sort((a, b) => b.timestamp - a.timestamp) // Sort by timestamp
-                    .map(item => item.date); // Return to string format
+                .map(date => ({ date, timestamp: parseDate(date).getTime() }))
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .map(item => item.date);
 
             // Populate the date dropdown with sorted dates
             dateDropdown.innerHTML = ''; // Clear existing options
@@ -71,19 +77,20 @@ async function getData() {
             // Display data for the first date by default
             if (sortedDates.length > 0) {
                 const firstDate = sortedDates[0];
-                displayData(allData[firstDate], firstDate);
+                displayData(allData[firstDate], firstDate, selectedLocation); // Pass selectedLocation here
             }
         } else {
             document.getElementById("data").innerHTML = "No data available!";
         }
-    });
+    }
 
-    // Listen for date selection change
-    dateDropdown.addEventListener("change", (event) => {
-        const selectedDate = event.target.value;
+    // Event listener to update data when the location is changed
+    locationDropdown.addEventListener("change", updateDataBasedOnSelection);
+
+    // Event listener to update data when the date is changed
+    dateDropdown.addEventListener("change", () => {
+        const selectedDate = dateDropdown.value;
         const selectedLocation = locationDropdown.value;
-
-        // Fetch data based on the selected date and location
         fetchDataForDate(selectedLocation, selectedDate);
     });
 
@@ -91,48 +98,81 @@ async function getData() {
     locationDropdown.dispatchEvent(new Event('change'));
 }
 
+
 // Function to fetch data for the selected date and location
 async function fetchDataForDate(location, date) {
     let coffeeLogsRef;
 
-    if (location === "dub19upstairs") {
-        coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
-    } else if (location === "dub19downstairs") {
-        coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
-    } else if (location === "dub21") {
-        coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
-    } else if (location === "dub14upstairs") {
-        coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
-    } else if (location === "dub14downstairs") {
-        coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+    // Set the correct Firestore reference based on the selected location
+    switch (location) {
+        case "dub19upstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+            break;
+        case "dub19downstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+            break;
+        case "dub21":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+            break;
+        case "dub14upstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
+            break;
+        case "dub14downstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+            break;
     }
 
-
     const docSnap = await getDoc(coffeeLogsRef);
-    
     if (docSnap.exists()) {
-        
         const allData = docSnap.data().logs;
-        
         if (allData[date]) {
-            
-            displayData(allData[date], date);
+            displayData(allData[date], date, location);  // Pass location to displayData
         } else {
             document.getElementById("data").innerHTML = "No data available for this date.";
         }
     }
 }
 
-// Function to display coffee data for a specific date
-function displayData(data, date) {
-    let dataHtml = `<h3>Coffee Data for ${date}</h3>`;
+function displayData(data, date, location) {
+    let totalCoffees = Object.values(data.coffeeCount).reduce((sum, value) => sum + value, 0);
+    let totalMilk = Object.values(data.milkCount).reduce((sum, value) => sum + value, 0);
+    let totalSyrups = Object.values(data.syrupCount).reduce((sum, value) => sum + value, 0);
 
-    dataHtml += `
-        <p><strong>Coffee Count:</strong><br> ${formatData(data.coffeeCount)}</p>
-        <p><strong>Milk Count:</strong><br> ${formatData(data.milkCount)}</p>
-        <p><strong>Syrup Count:</strong><br> ${formatData(data.syrupCount)}</p>
-        <p><strong>Extra Count:</strong><br> ${formatData(data.extraCount)}</p>
+    const locationNames = {
+        dub19upstairs: "Dub19 Upstairs",
+        dub19downstairs: "Dub19 Downstairs",
+        dub21: "Dub21",
+        dub14upstairs: "Dub14 Upstairs",
+        dub14downstairs: "Dub14 Downstairs"
+    };
+
+    const friendlyLocationName = locationNames[location] || location;
+
+    let dataHtml = `
+        <div class="coffee-data-container">
+            <h3 class="coffee-date-heading">Coffee Data for ${date} - Location: ${friendlyLocationName}</h3>
+            <div class="data-section">
+                <p class="total-amount"><strong>Total Coffees:</strong> ${totalCoffees}</p>
+                <p class="data-title"><strong>Coffee Count:</strong></p>
+                <div class="data-list">${formatData(data.coffeeCount)}</div>
+            </div>
+            <div class="data-section">
+                <p class="total-amount"><strong>Total Milk:</strong> ${totalMilk}</p>
+                <p class="data-title"><strong>Milk Count:</strong></p>
+                <div class="data-list">${formatData(data.milkCount)}</div>
+            </div>
+            <div class="data-section">
+                <p class="total-amount"><strong>Total Syrups:</strong> ${totalSyrups}</p>
+                <p class="data-title"><strong>Syrup Count:</strong></p>
+                <div class="data-list">${formatData(data.syrupCount)}</div>
+            </div>
+            <div class="data-section">
+                <p class="data-title"><strong>Extra Count:</strong></p>
+                <div class="data-list">${formatData(data.extraCount)}</div>
+            </div>
+        </div>
     `;
+
     document.getElementById("data").innerHTML = dataHtml;
 }
 
@@ -143,6 +183,7 @@ function formatData(countData) {
     }
 
     return Object.keys(countData)
+        .sort()  // Sort keys alphabetically
         .map(key => `${key}: ${countData[key]}`)
         .join('<br>');
 }
@@ -168,13 +209,26 @@ function exportDataToCSV() {
         return;
     }
 
-    // Prepare the CSV header and data rows
+    // Function to sort keys alphabetically and format as CSV string
+    function sortAndFormatData(obj, totalLabel) {
+        const sortedEntries = Object.keys(obj).sort().map(key => `${key},${obj[key]}`);
+        const totalCount = Object.values(obj).reduce((sum, count) => sum + count, 0);
+        return [`${totalLabel},${totalCount}`, ...sortedEntries].join("\n");
+    }
+
+    // Prepare the CSV header
     const header = [`Location,${location}`, `Date,${date}`];
+
+    const coffeeData = sortAndFormatData(data.coffeeCount, "Total Coffees");
+    const milkData = sortAndFormatData(data.milkCount, "Total Milk");
+    const syrupData = sortAndFormatData(data.syrupCount, "Total Syrups");
+    const extraData = formatDataForCSV(data.extraCount);
+
     const rows = [
-        ["Coffee Count", formatDataForCSV(data.coffeeCount)],
-        ["Milk Count", formatDataForCSV(data.milkCount)],
-        ["Syrup Count", formatDataForCSV(data.syrupCount)],
-        ["Extra Count", formatDataForCSV(data.extraCount)]
+        ["Coffee Count", coffeeData],
+        ["Milk Count", milkData],
+        ["Syrup Count", syrupData],
+        ["Extra Count", extraData]
     ];
 
     // Start building the CSV content
@@ -195,9 +249,6 @@ function exportDataToCSV() {
     link.click();
     document.body.removeChild(link); // Remove the link after download
 }
-
-
-
 
 
 // Add event listener for the export button
