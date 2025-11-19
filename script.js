@@ -175,19 +175,66 @@ function displayData(data, date, location) {
 
     document.getElementById("data").innerHTML = dataHtml;
 }
-
+// Custom sort order for coffee drinks
+const coffeeSortOrder = [
+    "Single espresso",
+    "Double espresso",
+    "Latte",
+    "Cappucino",
+    "Flat white",
+    "Americano",
+    "Small americano",
+    "Iced americano",
+    "Mocha",
+    "Hot chocolate",
+    "Macchiato",
+    "Cortado",
+    "Chai latte",
+    "Matcha",
+    "Coffee special",
+    "Iced latte",
+    "Tea"
+];
 // Function to format the data in a readable way
 function formatData(countData) {
     if (Object.keys(countData).length === 0) {
         return "No additional items.";
     }
 
-    return Object.keys(countData)
-        .sort()  // Sort keys alphabetically
-        .map(key => `${key}: ${countData[key]}`)
-        .join('<br>');
+    const keys = Object.keys(countData);
+
+    // Check if this is a coffeeCount object
+    const isCoffee = keys.some(key => coffeeSortOrder.includes(key));
+
+    let sortedKeys;
+
+    if (isCoffee) {
+        // Sort coffee using custom order
+        sortedKeys = keys.sort((a, b) => {
+            const indexA = coffeeSortOrder.indexOf(a);
+            const indexB = coffeeSortOrder.indexOf(b);
+
+            // Items not in the list go to the bottom alphabetically
+            if (indexA === -1 && indexB === -1) {
+                return a.localeCompare(b);
+            }
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+
+            return indexA - indexB;
+        });
+    } else {
+        // Default alphabetical sort (milk, syrups, extras)
+        sortedKeys = keys.sort();
+    }
+
+    return sortedKeys.map(key => `${key}: ${countData[key]}`).join('<br>');
 }
+
 // Function to format the data in a readable way for CSV
+
+
+
 function formatDataForCSV(countData) {
     if (Object.keys(countData).length === 0) {
         return "No additional items.";
