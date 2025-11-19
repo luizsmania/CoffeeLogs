@@ -177,22 +177,22 @@ function displayData(data, date, location) {
 }
 // Custom sort order for coffee drinks
 const coffeeSortOrder = [
-    "Single espresso",
-    "Double espresso",
+    "Single Espresso",
+    "Double Espresso",
     "Latte",
-    "Cappucino",
-    "Flat white",
+    "Cappuccino",
+    "Flat White",
     "Americano",
-    "Small americano",
-    "Iced americano",
+    "Small Americano",
+    "Iced Americano",
     "Mocha",
-    "Hot chocolate",
+    "Hot Chocolate",
     "Macchiato",
     "Cortado",
-    "Chai latte",
-    "Matcha",
-    "Coffee special",
-    "Iced latte",
+    "Chai Latte",
+    "Matcha Latte",
+    "Coffee Special",
+    "Iced Latte",
     "Tea"
 ];
 // Function to format the data in a readable way
