@@ -32,57 +32,79 @@ async function getData() {
     const dateDropdown = document.getElementById("date-dropdown");
     
     // Fetch data whenever the location or date changes
-    async function updateDataBasedOnSelection() {
-        const selectedLocation = locationDropdown.value;
+  async function updateDataBasedOnSelection() {
+    const selectedLocation = locationDropdown.value;
+    const previouslySelectedDate = dateDropdown.value; // <-- salva a data atual
 
-        // Set the correct Firestore reference based on the selected location
-        let coffeeLogsRef;
-        switch (selectedLocation) {
-            case "dub19upstairs":
-                coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
-                break;
-            case "dub19downstairs":
-                coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
-                break;
-            case "dub21":
-                coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
-                break;
-            case "dub14upstairs":
-                coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
-                break;
-            case "dub14downstairs":
-                coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
-                break;
-        }
+    let coffeeLogsRef;
+    switch (selectedLocation) {
+        case "dub19upstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "coffee_logs");
+            break;
+        case "dub19downstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub19downstairs_coffee_logs");
+            break;
+        case "dub21":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub21_coffee_logs");
+            break;
+        case "dub14upstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub14upstairs_coffee_logs");
+            break;
+        case "dub14downstairs":
+            coffeeLogsRef = doc(db, "coffee_logs", "dub14downstairs_coffee_logs");
+            break;
+    }
 
-        const docSnap = await getDoc(coffeeLogsRef);
-        if (docSnap.exists()) {
-            allData = docSnap.data().logs;  // Store data in the global variable
+    const docSnap = await getDoc(coffeeLogsRef);
+    if (!docSnap.exists()) {
+        document.getElementById("data").innerHTML = "No data available!";
+        return;
+    }
 
-            // Sort the dates in descending order (most recent first)
-            const sortedDates = Object.keys(allData)
-                .map(date => ({ date, timestamp: parseDate(date).getTime() }))
-                .sort((a, b) => b.timestamp - a.timestamp)
-                .map(item => item.date);
+    allData = docSnap.data().logs;
 
-            // Populate the date dropdown with sorted dates
-            dateDropdown.innerHTML = ''; // Clear existing options
-            sortedDates.forEach((date) => {
-                const option = document.createElement("option");
-                option.value = date;
-                option.textContent = date;
-                dateDropdown.appendChild(option);
-            });
+    // Ordena todas as datas do novo local
+    const sortedDates = Object.keys(allData)
+        .map(date => ({ date, timestamp: parseDate(date).getTime() }))
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .map(item => item.date);
 
-            // Display data for the first date by default
-            if (sortedDates.length > 0) {
-                const firstDate = sortedDates[0];
-                displayData(allData[firstDate], firstDate, selectedLocation); // Pass selectedLocation here
-            }
+    // Atualiza o dropdown
+    dateDropdown.innerHTML = "";
+    sortedDates.forEach(date => {
+        let option = document.createElement("option");
+        option.value = date;
+        option.textContent = date;
+        dateDropdown.appendChild(option);
+    });
+
+    // 🔥 LÓGICA PRINCIPAL: tentar manter a mesma data
+    let finalDate = null;
+
+    if (sortedDates.includes(previouslySelectedDate)) {
+        finalDate = previouslySelectedDate; // existe → mantém igual
+    } else {
+        // pega apenas datas anteriores à data original
+        const previousDates = sortedDates.filter(d => parseDate(d) < parseDate(previouslySelectedDate));
+
+        if (previousDates.length > 0) {
+            finalDate = previousDates[0]; // pega a mais recente anterior
         } else {
-            document.getElementById("data").innerHTML = "No data available!";
+            finalDate = sortedDates[0]; // pega a mais recente de todas
         }
     }
+
+    dateDropdown.value = finalDate;
+        // Adiciona destaque visual ao dropdown
+    dateDropdown.classList.add("highlight-update");
+
+    // Remove o destaque depois de 1 segundo
+    setTimeout(() => {
+        dateDropdown.classList.remove("highlight-update");
+    }, 1000);
+    displayData(allData[finalDate], finalDate, selectedLocation);
+}
+
 
     // Event listener to update data when the location is changed
     locationDropdown.addEventListener("change", updateDataBasedOnSelection);
@@ -151,30 +173,77 @@ function displayData(data, date, location) {
     let dataHtml = `
         <div class="coffee-data-container">
             <h3 class="coffee-date-heading">Coffee Data for ${date} - Location: ${friendlyLocationName}</h3>
+            
             <div class="data-section">
                 <p class="total-amount"><strong>Total Coffees:</strong> ${totalCoffees}</p>
                 <p class="data-title"><strong>Coffee Count:</strong></p>
-                <div class="data-list">${formatData(data.coffeeCount)}</div>
+                <div class="data-list">${formatData(data.coffeeCount, "coffee")}</div>
             </div>
+
             <div class="data-section">
                 <p class="total-amount"><strong>Total Milk:</strong> ${totalMilk}</p>
                 <p class="data-title"><strong>Milk Count:</strong></p>
-                <div class="data-list">${formatData(data.milkCount)}</div>
+                <div class="data-list">${formatData(data.milkCount, "milk")}</div>
             </div>
+
             <div class="data-section">
                 <p class="total-amount"><strong>Total Syrups:</strong> ${totalSyrups}</p>
                 <p class="data-title"><strong>Syrup Count:</strong></p>
-                <div class="data-list">${formatData(data.syrupCount)}</div>
+                <div class="data-list">${formatData(data.syrupCount, "syrup")}</div>
             </div>
+
             <div class="data-section">
                 <p class="data-title"><strong>Extra Count:</strong></p>
-                <div class="data-list">${formatData(data.extraCount)}</div>
+                <div class="data-list">${formatData(data.extraCount, "extra")}</div>
             </div>
         </div>
     `;
 
     document.getElementById("data").innerHTML = dataHtml;
 }
+
+
+// LISTAS OFICIAIS (EXATAMENTE COMO NA SUA PÁGINA)
+const ALL_COFFEES = [
+    "Single Espresso",
+    "Double Espresso",
+    "Latte",
+    "Cappuccino",
+    "Flat White",
+    "Americano",
+    "Small Americano",
+    "Iced Americano",
+    "Mocha",
+    "Hot Chocolate",
+    "Macchiato",
+    "Cortado",
+    "Chai Latte",
+    "Matcha Latte",
+    "Special Coffee",
+    "Iced Latte",
+    "Tea",
+    "Vietnamese"
+];
+    
+
+const ALL_MILKS = [
+    "Oat Milk",
+    "Coconut Milk",
+    "Almond Milk"
+];
+
+const ALL_SYRUPS = [
+    "Caramel",
+    "Hazelnut",
+    "Vanilla",
+    "Salted Caramel",
+    "Pumpkin Spice"
+];
+
+const ALL_EXTRAS = [
+    "Extra Shot",
+    "Decaff"
+];
 // Custom sort order for coffee drinks
 const coffeeSortOrder = [
     "Single Espresso",
@@ -196,41 +265,22 @@ const coffeeSortOrder = [
     "Tea"
 ];
 // Function to format the data in a readable way
-function formatData(countData) {
-    if (Object.keys(countData).length === 0) {
-        return "No additional items.";
-    }
+function formatData(countData, type) {
+    let fullList;
 
-    const keys = Object.keys(countData);
+    if (type === "coffee") fullList = ALL_COFFEES;
+    else if (type === "milk") fullList = ALL_MILKS;
+    else if (type === "syrup") fullList = ALL_SYRUPS;
+    else fullList = ALL_EXTRAS;
 
-    // Check if this is a coffeeCount object
-    const isCoffee = keys.some(key => coffeeSortOrder.includes(key));
+    // Preenche valores faltantes com 0
+    const filledData = {};
+    fullList.forEach(item => {
+        filledData[item] = countData[item] || 0;
+    });
 
-    let sortedKeys;
-
-    if (isCoffee) {
-        // Sort coffee using custom order
-        sortedKeys = keys.sort((a, b) => {
-            const indexA = coffeeSortOrder.indexOf(a);
-            const indexB = coffeeSortOrder.indexOf(b);
-
-            // Items not in the list go to the bottom alphabetically
-            if (indexA === -1 && indexB === -1) {
-                return a.localeCompare(b);
-            }
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-
-            return indexA - indexB;
-        });
-    } else {
-        // Default alphabetical sort (milk, syrups, extras)
-        sortedKeys = keys.sort();
-    }
-
-    return sortedKeys.map(key => `${key}: ${countData[key]}`).join('<br>');
+    return fullList.map(item => `${item}: ${filledData[item]}`).join("<br>");
 }
-
 // Function to format the data in a readable way for CSV
 
 

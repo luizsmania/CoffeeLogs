@@ -1,140 +1,174 @@
-/* Global Styles */
+/* ===========================
+   Global Styles
+=========================== */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: #f0f2f5;
     color: #333;
     line-height: 1.6;
 }
 
 h1 {
     text-align: center;
-    padding: 20px 0;
-    background-color: #4CAF50;
+    padding: 25px 0;
+    background: linear-gradient(90deg, #4CAF50, #67C26F);
     color: white;
     font-size: 36px;
     letter-spacing: 2px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Container for the content */
+/* ===========================
+   Container
+=========================== */
 .container {
     max-width: 960px;
     margin: 40px auto;
-    padding: 30px;
-    background-color: white;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    padding: 35px;
+    background-color: #fff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
     font-size: 18px;
 }
 
-/* Labels for the dropdowns */
+/* ===========================
+   Labels & Dropdowns
+=========================== */
 label {
     font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-weight: 600;
+    margin-bottom: 8px;
     display: block;
-    color: #555;
+    color: #444;
 }
 
-/* Style for select dropdowns */
 select {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     margin: 10px 0 20px;
-    font-size: 18px;
+    font-size: 17px;
     background-color: #fafafa;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    appearance: none;
 }
 
-select:hover {
+select:hover, select:focus {
     border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
 }
 
-/* Data Section (displaying data for a specific date) */
-.data-section {
-    margin-top: 30px;
+/* Highlight for updated dropdown */
+.highlight-update {
+    background-color: #fffa8d !important;
+    transition: background-color 1s ease;
 }
 
+/* ===========================
+   Export Button
+=========================== */
+#export-button {
+    padding: 14px 24px;
+    background: linear-gradient(90deg, #4CAF50, #67C26F);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+#export-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+#export-button:active {
+    background-color: #3e8e41;
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* ===========================
+   Date Info Section
+=========================== */
 .date-data {
     background-color: #f9f9f9;
-    padding: 20px;
+    padding: 22px;
     margin-bottom: 30px;
-    border-radius: 8px;
-    border-left: 5px solid #4CAF50;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 3%;
-}
-
-h3 {
-    margin-top: 0;
-    font-size: 26px;
-    color: #4CAF50;
-    text-align: center;
+    border-radius: 10px;
+    border-left: 6px solid #4CAF50;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .date-data p {
     margin: 10px 0;
-    font-size: 18px;
-    line-height: 1.6;
+    font-size: 17px;
     color: #555;
 }
 
 .date-data p strong {
-    font-weight: bold;
+    font-weight: 600;
     color: #4CAF50;
 }
 
-/* Styling for the total amounts */
-.total-amount {
-    margin-bottom: 4px;
-    font-size: 18px;
-    color: #333;
-    font-weight: bold;
-    padding: 5px;
-    background-color: #e9f5e9;
-    border-radius: 5px;
+/* ===========================
+   Coffee Data Section
+=========================== */
+.data-section {
+    margin-top: 30px;
 }
 
-/* Border between total amount paragraphs */
-.date-data p:not(:last-child) {
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
+.coffee-data-container {
+    padding: 20px;
+    background-color: #fdfdfd;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
-/* Export Button */
-#export-button {
-    padding: 14px 24px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-    width: 100%;
+.coffee-date-heading {
+    font-size: 24px;
     text-align: center;
-    margin-top: 20px;
+    color: #388E3C;
+    margin-bottom: 20px;
 }
 
-#export-button:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
+.data-section p.data-title {
+    font-weight: 600;
+    margin: 10px 0 5px;
+    color: #333;
 }
 
-#export-button:active {
-    background-color: #388e3c;
-    transform: translateY(0);
+.data-section .data-list {
+    padding-left: 10px;
+    margin-bottom: 15px;
 }
 
-/* Responsive design */
+.total-amount {
+    background-color: #e8f5e9;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 5px;
+}
+
+/* ===========================
+   Responsive Design
+=========================== */
 @media (max-width: 768px) {
     .container {
-        padding: 20px;
+        padding: 25px;
     }
 
     h1 {
@@ -154,4 +188,3 @@ h3 {
         padding: 12px 18px;
     }
 }
-
